@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Painel de Metas - Ramalho Pet Shop{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="contador-regressivo" id="contador-regressivo">
+        Contagem regressiva para o fim do mês: <span id="tempo-restante"></span>
+    </div>
+
+    <div class="frase-motivacional-painel" id="frase-motivacional-painel">
+        <!-- Frase será carregada por JS -->
+        Carregando inspiração...
+    </div>
+
+    <!-- Seção Master (Visível apenas para Vinícius Ramalho) -->
+    {% if usuario_master %}
+    <div class="card painel-master">
+        <h2 class="card-header">Painel Consolidado - Master</h2>
+        <div class="grid-metas">
+            <div class="meta-consolidada">
+                <h3>Total Geral do Grupo</h3>
+                <p>Faturamento Diário: R$ <span id="master-faturamento-diario-total">0,00</span></p>
+                <p>Meta Diária: R$ <span id="master-meta-diaria-total">0,00</span></p>
+                <p>Atingido: <span id="master-percentual-total">0</span>%</p>
+                <div class="barra-progresso">
+                    <div class="progresso-atual" id="master-progresso-total" style="width: 0%;">0%</div>
+                </div>
+                <p>Acumulado no Mês: R$ <span id="master-acumulado-mes-total">0,00</span></p>
+            </div>
+        </div>
+        <hr style="margin: 20px 0;">
+        <h3>Desempenho por Loja</h3>
+        <div class="grid-lojas-master">
+            <!-- Lojas serão listadas aqui dinamicamente -->
+            {% for loja in lojas %}
+            <div class="card-loja-master">
+                <h4>{{ loja.nome }}</h4>
+                <p>Faturamento Diário: R$ <span id="master-faturamento-{{ loja.id }}">0,00</span></p>
+                <p>Meta Diária: R$ <span id="master-meta-{{ loja.id }}">0,00</span></p>
+                <p>Atingido: <span id="master-percentual-{{ loja.id }}">0</span>%</p>
+                <div class="barra-progresso">
+                    <div class="progresso-atual" id="master-progresso-{{ loja.id }}" style="width: 0%;">0%</div>
+                </div>
+                <p>Acumulado no Mês: R$ <span id="master-acumulado-{{ loja.id }}">0,00</span></p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Seção da Loja (Visível para usuários de loja) -->
+    {% if usuario_loja %}
+    <div class="card painel-loja">
+        <h2 class="card-header">Painel da Loja: {{ nome_loja }}</h2>
+        <form id="form-faturamento-diario">
+            <div class="form-group">
+                <label for="faturamento-dia">Registrar Faturamento do Dia ({{ data_atual }}):</label>
+                <input type="number" id="faturamento-dia" name="faturamento_dia" step="0.01" min="0" required>
+            </div>
+            <button type="submit" class="btn btn-principal">Salvar Faturamento</button>
+        </form>
+        <hr style="margin: 20px 0;">
+        <div class="meta-info">
+            <h3>Meta do Dia</h3>
+            <p>Sua meta para hoje: R$ <span id="loja-meta-diaria">0,00</span></p>
+            <p>Faturamento Registrado: R$ <span id="loja-faturamento-registrado">0,00</span></p>
+            <p>Percentual Atingido: <span id="loja-percentual-atingido">0</span>%</p>
+            <div class="barra-progresso">
+                <div class="progresso-atual" id="loja-progresso-diario" style="width: 0%;">0%</div>
+            </div>
+            <p>Total Acumulado no Mês: R$ <span id="loja-acumulado-mes">0,00</span></p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quadro de Medalhas (Público) -->
+    <div class="card quadro-medalhas-container">
+        <h2 class="card-header">Quadro de Medalhas do Mês</h2>
+        <div class="quadro-medalhas" id="quadro-medalhas-geral">
+            <!-- Medalhas serão carregadas aqui (ex: Alvarenga: 🏆🏆, Corbisier: 🏆) -->
+            <p>Carregando medalhas...</p>
+        </div>
+        <div class="historico-medalhas-link">
+            <a href="{{ url_for("main.historico_medalhas") }}" class="btn btn-secundario">Ver Histórico de Medalhas</a>
+        </div>
+    </div>
+
+    <!-- Destaques do Dia -->
+    <div id="destaques-do-dia">
+        <!-- Mensagens de destaque aparecerão aqui -->
+    </div>
+
+    <!-- Alerta de Bônus -->
+    <div id="alerta-bonus-equipe" class="alerta alerta-bonus" style="display: none;">
+        🎉 Bônus de R$ 500 liberado para toda a equipe! 🎉
+    </div>
+
+</div>
+
+<style>
+.dashboard-container {
+    padding: 1rem;
+}
+.grid-metas, .grid-lojas-master {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+.meta-consolidada, .card-loja-master, .painel-loja .meta-info {
+    padding: 1rem;
+    border: 1px solid var(--cor-fundo-escuro);
+    border-radius: 5px;
+    background-color: #fff;
+}
+.painel-loja .meta-info h3, .meta-consolidada h3, .card-loja-master h4 {
+    color: var(--cor-roxo-principal);
+    margin-bottom: 0.5rem;
+}
+.quadro-medalhas-container {
+    margin-top: 2rem;
+}
+.historico-medalhas-link {
+    text-align: center;
+    margin-top: 1rem;
+}
+#destaques-do-dia .alerta {
+    margin-top: 1rem;
+}
+</style>
+
+{% endblock %}
+

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Área Administrativa - Ramalho Pet Shop Metas{% endblock %}
+
+{% block content %}
+<div class="admin-container card">
+    <h2 class="card-header">Painel Administrativo (Master: {{ current_user.username }})</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alerta alert-{{ category if category else 'info' }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="admin-section">
+        <h3>Gerenciar Metas Mensais</h3>
+        <form method="POST" action="{{ url_for("main.upload_metas") }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="metas_file">Selecione a planilha de metas (.xlsx):</label>
+                <input type="file" id="metas_file" name="metas_file" accept=".xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-principal">Enviar Planilha de Metas</button>
+        </form>
+        <p class="text-muted" style="margin-top: 10px;">A planilha deve seguir o formato do arquivo "Meta Maio 25.xlsx" fornecido, com abas nomeadas "Alvarenga", "Corbisier", "Piraporinha", contendo colunas "Dia" e "Meta".</p>
+    </div>
+
+    <hr style="margin: 30px 0;">
+
+    <div class="admin-section">
+        <h3>Outras Ações Administrativas</h3>
+        <p><em>(Mais funcionalidades administrativas serão adicionadas aqui, como visualização de metas carregadas, edição manual, etc.)</em></p>
+        <!-- Exemplo: Link para visualizar usuários -->
+        <!-- <a href="{{ url_for("main.listar_usuarios") }}" class="btn btn-secundario">Gerenciar Usuários</a> -->
+    </div>
+
+</div>
+
+<style>
+.admin-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+}
+.admin-section {
+    margin-bottom: 2rem;
+}
+.admin-section h3 {
+    color: var(--cor-roxo-principal);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--cor-fundo-escuro);
+    padding-bottom: 0.5rem;
+}
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+}
+
+</style>
+{% endblock %}
+

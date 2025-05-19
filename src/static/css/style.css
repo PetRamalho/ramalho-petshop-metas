@@ -1,0 +1,315 @@
+/****** Ramalho Pet Shop - Metas CSS ******/
+
+/* Variáveis de Cor e Fonte */
+:root {
+    --cor-roxo-principal: #743C94; /* R116 G60 B148 */
+    --cor-amarelo-principal: #FFD525; /* R255 G213 B37 */
+    --cor-texto-claro: #FFFFFF;
+    --cor-texto-escuro: #333333;
+    --cor-fundo-claro: #F8F9FA;
+    --cor-fundo-escuro: #E9ECEF;
+    --cor-sucesso: #28a745;
+    --cor-alerta: #ffc107;
+    --cor-erro: #dc3545;
+    --fonte-principal: 'Graviola Soft', 'Roboto', sans-serif; /* Idealmente Graviola Soft */
+    --fonte-secundaria: 'Roboto', sans-serif;
+}
+
+/* Reset Básico e Configurações Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--fonte-principal);
+    line-height: 1.6;
+    color: var(--cor-texto-escuro);
+    background-color: var(--cor-fundo-claro);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Cabeçalho */
+header {
+    background-color: var(--cor-roxo-principal);
+    color: var(--cor-texto-claro);
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header .container {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centraliza se houver espaço */
+    gap: 20px;
+}
+
+header #logo {
+    max-height: 60px; /* Ajustar conforme necessário */
+    width: auto;
+}
+
+header h1 {
+    font-family: var(--fonte-principal);
+    font-weight: 700; /* Bold */
+    font-size: 2rem;
+    margin: 0;
+}
+
+/* Conteúdo Principal */
+main {
+    flex-grow: 1;
+    padding: 2rem 0;
+}
+
+/* Rodapé */
+footer {
+    background-color: var(--cor-fundo-escuro);
+    color: var(--cor-texto-escuro);
+    text-align: center;
+    padding: 1.5rem 0;
+    border-top: 3px solid var(--cor-amarelo-principal);
+}
+
+footer #frase-inspiradora {
+    font-style: italic;
+    color: var(--cor-roxo-principal);
+    margin-top: 0.5rem;
+    font-weight: bold;
+}
+
+/* Elementos Visuais de Pets (Exemplo) */
+.pet-icon-patas::before {
+    content: "🐾"; /* Exemplo, pode ser uma imagem SVG */
+    margin-right: 5px;
+    color: var(--cor-amarelo-principal);
+}
+
+.pet-icon-osso::before {
+    content: "🦴"; /* Exemplo, pode ser uma imagem SVG */
+    margin-right: 5px;
+    color: var(--cor-roxo-principal);
+}
+
+/* Botões */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-family: var(--fonte-principal);
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-principal {
+    background-color: var(--cor-amarelo-principal);
+    color: var(--cor-roxo-principal);
+    border: 2px solid var(--cor-amarelo-principal);
+}
+
+.btn-principal:hover {
+    background-color: #FFC700; /* Amarelo um pouco mais escuro */
+    border-color: #FFC700;
+}
+
+.btn-secundario {
+    background-color: var(--cor-roxo-principal);
+    color: var(--cor-texto-claro);
+    border: 2px solid var(--cor-roxo-principal);
+}
+
+.btn-secundario:hover {
+    background-color: #5A2D73; /* Roxo um pouco mais escuro */
+    border-color: #5A2D73;
+}
+
+/* Formulários */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"],
+.form-group input[type="number"],
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: var(--fonte-secundaria);
+}
+
+/* Cards e Painéis */
+.card {
+    background-color: var(--cor-texto-claro);
+    border: 1px solid var(--cor-fundo-escuro);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--cor-roxo-principal);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--cor-amarelo-principal);
+    padding-bottom: 0.5rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    header #logo {
+        max-height: 45px;
+    }
+
+    .container {
+        width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    header .container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    header h1 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Estilos para o painel de metas - a serem expandidos */
+.painel-metas {
+    /* ... */
+}
+
+.meta-item {
+    /* ... */
+}
+
+.barra-progresso {
+    width: 100%;
+    background-color: var(--cor-fundo-escuro);
+    border-radius: 5px;
+    height: 25px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progresso-atual {
+    height: 100%;
+    background-color: var(--cor-sucesso);
+    color: var(--cor-texto-claro);
+    text-align: center;
+    line-height: 25px;
+    font-weight: bold;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Contador Regressivo */
+.contador-regressivo {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--cor-roxo-principal);
+    margin: 1rem 0;
+    text-align: center;
+    padding: 0.5rem;
+    background-color: var(--cor-amarelo-principal);
+    border-radius: 5px;
+}
+
+/* Frases Inspiradoras Dinâmicas */
+.frase-motivacional-painel {
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: var(--cor-fundo-escuro);
+    border-left: 5px solid var(--cor-roxo-principal);
+    color: var(--cor-texto-escuro);
+}
+
+/* Alertas */
+.alerta {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.alerta-sucesso {
+    background-color: #d4edda; /* Verde claro */
+    color: #155724; /* Verde escuro */
+    border: 1px solid #c3e6cb;
+}
+
+.alerta-bonus {
+    background-color: var(--cor-amarelo-principal);
+    color: var(--cor-roxo-principal);
+    border: 2px dashed var(--cor-roxo-principal);
+    text-align: center;
+    font-size: 1.5rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Quadro de Medalhas (placeholder) */
+.quadro-medalhas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.medalha {
+    width: 80px;
+    height: 80px;
+    background-color: var(--cor-amarelo-principal);
+    border: 3px solid var(--cor-roxo-principal);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem; /* Para um ícone de medalha, ex: 🏆 */
+    color: var(--cor-roxo-principal);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+

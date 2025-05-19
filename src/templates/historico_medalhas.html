@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Histórico de Medalhas - Ramalho Pet Shop{% endblock %}
+
+{% block content %}
+<div class="container card">
+    <h2 class="card-header">Histórico de Medalhas</h2>
+    
+    <div class="historico-medalhas-content">
+        <!-- Conteúdo do histórico de medalhas será carregado aqui -->
+        <p><em>Funcionalidade de histórico de medalhas em desenvolvimento.</em></p>
+        
+        <!-- Exemplo de como poderia ser a estrutura -->
+        <!-- 
+        {% for entrada_historico in historico %}
+        <div class="mes-historico">
+            <h3>{{ entrada_historico.mes_ano }}</h3>
+            <ul>
+                {% for loja_medalha in entrada_historico.lojas %}
+                <li>{{ loja_medalha.nome_loja }}: {{ loja_medalha.quantidade }} medalhas 🏅</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+        -->
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{{ url_for("main.dashboard") }}" class="btn btn-secundario">Voltar ao Painel</a>
+    </div>
+</div>
+
+<style>
+.historico-medalhas-content {
+    padding: 1rem;
+}
+.mes-historico {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--cor-fundo-escuro);
+    border-radius: 5px;
+}
+.mes-historico h3 {
+    color: var(--cor-roxo-principal);
+}
+.mes-historico ul {
+    list-style: none;
+    padding-left: 0;
+}
+.mes-historico li {
+    padding: 0.25rem 0;
+}
+</style>
+{% endblock %}
+
