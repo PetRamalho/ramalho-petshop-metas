@@ -8,15 +8,18 @@ sys.path.append(os.path.join(BASE_DIR, "src"))
 from src.main import app, db # Importa app e db de src.main
 from src.models.user import User # Importa o modelo User
 
+# Configuração do SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+
 def create_users():
     with app.app_context():
         db.create_all() # Garante que todas as tabelas existam
 
         users_data = [
-            {"username": "vinicius", "password": "master123", "role": "master", "store_name": None},
-            {"username": "alvarenga", "password": "loja123", "role": "loja", "store_name": "Alvarenga"},
-            {"username": "corbisier", "password": "loja123", "role": "loja", "store_name": "Corbisier"},
-            {"username": "piraporinha", "password": "loja123", "role": "loja", "store_name": "Piraporinha"}
+            {"username": "Adm", "password": "adm123", "role": "master", "store_name": None},
+            {"username": "alvarenga", "password": "alvarenga123", "role": "loja", "store_name": "Alvarenga"},
+            {"username": "corbisier", "password": "corbisier321", "role": "loja", "store_name": "Corbisier"},
+            {"username": "piraporinha", "password": "piraporinha321", "role": "loja", "store_name": "Piraporinha"}
         ]
 
         for user_data in users_data:
