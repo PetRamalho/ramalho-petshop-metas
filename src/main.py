@@ -8,6 +8,7 @@ from flask_login import LoginManager # Added LoginManager
 from src.models.user import db, User # Added User for user_loader
 from src.routes.auth import auth_bp # Blueprint for authentication routes
 from src.routes.main import main_bp # Blueprint for main application routes
+from flask import redirect, url_for
 
 app = Flask(__name__, 
             static_folder=os.path.join(os.path.dirname(__file__), 'static'),
@@ -43,6 +44,23 @@ with app.app_context():
     if not os.path.exists(app.template_folder):
         os.makedirs(app.template_folder)
     db.create_all()
+    
+    # Criar usuários iniciais se não existirem
+    if User.query.count() == 0:
+        users_data = [
+            {"username": "adm", "password": "adm123", "role": "master", "store_name": None},
+            {"username": "alvarenga", "password": "alvarenga123", "role": "loja", "store_name": "Alvarenga"},
+            {"username": "corbisier", "password": "corbisier321", "role": "loja", "store_name": "Corbisier"},
+            {"username": "piraporinha", "password": "piraporinha321", "role": "loja", "store_name": "Piraporinha"}
+        ]
+        
+        for user_data in users_data:
+            new_user = User(username=user_data["username"], role=user_data["role"], store_name=user_data["store_name"])
+            new_user.set_password(user_data["password"])
+            db.session.add(new_user)
+        
+        db.session.commit()
+        print("Usuários iniciais criados com sucesso!")
 
 # The serve_static_or_index function was complex and might conflict with blueprint routes.
 # Flask handles static files automatically if static_folder is set.
