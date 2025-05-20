@@ -87,3 +87,4 @@ def historico_medalhas():
     return render_template("historico_medalhas.html") # Needs this template created
 
 # Add other main application routes here (e.g., admin panel for master user)
+
