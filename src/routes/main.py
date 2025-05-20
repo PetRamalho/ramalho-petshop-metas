@@ -8,6 +8,18 @@ import pandas as pd
 import locale
 import calendar
 import json
+# Configurar pasta de upload
+import os
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Configurar a aplicação
+main_bp = Blueprint("main", __name__)
+
+@main_bp.record
+def record_params(setup_state):
+    app = setup_state.app
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Tente configurar o locale para português do Brasil
 try:
