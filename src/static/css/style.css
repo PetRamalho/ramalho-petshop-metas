@@ -374,3 +374,62 @@ footer #frase-inspiradora {
     text-shadow: 1px 1px 1px #743C94;
 }
 
+/* Estilos para o seletor de mês/ano */
+.month-year-selector {
+    background-color: var(--cor-fundo-claro);
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid var(--cor-fundo-escuro);
+}
+
+.selector-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.selector-container label {
+    font-weight: bold;
+    color: var(--cor-roxo-principal);
+    margin-right: 5px;
+}
+
+.selector-container select {
+    padding: 8px;
+    border: 1px solid var(--cor-fundo-escuro);
+    border-radius: 4px;
+    background-color: white;
+    color: var(--cor-texto-escuro);
+}
+
+.btn-sm {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+}
+
+.viewing-period {
+    margin-top: 10px;
+    font-style: italic;
+    color: var(--cor-roxo-principal);
+}
+
+.viewing-period strong {
+    color: var(--cor-amarelo-principal);
+    text-shadow: 1px 1px 1px var(--cor-roxo-principal);
+}
+
+@media (max-width: 768px) {
+    .selector-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .selector-container select, 
+    .selector-container button {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
