@@ -277,7 +277,7 @@ def dashboard_loja():
                            dados_hoje=dados_hoje,
                            dia_atual=dia_atual)
 
-@main_bp.route("/registrar-faturamento", methods=["POST"])
+@main_bp.route("/registrar_faturamento", methods=["POST"])
 @login_required
 def registrar_faturamento():
     if current_user.role != "loja":
