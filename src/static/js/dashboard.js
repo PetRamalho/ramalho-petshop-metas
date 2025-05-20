@@ -165,8 +165,106 @@ function atualizarGraficoMetaMensal(lojaId, dados) {
 
 // Função para inicializar o painel da loja
 function inicializarPainelLoja() {
-    // Implementar lógica específica para o painel da loja
-    // (similar ao painel master, mas com foco apenas na loja atual)
+    // Verificar se temos dados da loja em formato JSON
+    const historicoElement = document.getElementById('historico-json');
+    const dadosMetaElement = document.getElementById('dados-meta-json');
+    
+    if (!historicoElement || !dadosMetaElement) return;
+    
+    try {
+        // Obter dados da loja
+        const historico = JSON.parse(historicoElement.textContent);
+        const dadosMeta = JSON.parse(dadosMetaElement.textContent);
+        
+        // Preencher a tabela de histórico
+        preencherHistoricoLoja(historico);
+        
+        // Atualizar o gráfico de meta mensal
+        atualizarGraficoMetaMensalLoja(dadosMeta);
+        
+        // Atualizar dados do dia atual
+        const diaAtual = new Date().getDate();
+        const dadosDia = historico.find(dia => dia.dia === diaAtual) || historico[historico.length - 1];
+        
+        if (dadosDia) {
+            document.getElementById('loja-meta-diaria').textContent = formatarValor(dadosDia.meta);
+            document.getElementById('loja-faturamento-registrado').textContent = formatarValor(dadosDia.faturamento);
+            document.getElementById('loja-percentual-atingido').textContent = dadosDia.percentual;
+            document.getElementById('loja-progresso-diario').style.width = `${Math.min(dadosDia.percentual, 100)}%`;
+            document.getElementById('loja-progresso-diario').textContent = `${dadosDia.percentual}%`;
+        }
+        
+        // Atualizar acumulado do mês
+        document.getElementById('loja-acumulado-mes').textContent = formatarValor(dadosMeta.acumulado);
+        
+    } catch (error) {
+        console.error('Erro ao processar dados da loja:', error);
+    }
+}
+
+// Função para preencher a tabela de histórico da loja
+function preencherHistoricoLoja(historico) {
+    const tbody = document.getElementById('loja-historico-diario');
+    if (!tbody) return;
+    
+    // Limpar conteúdo atual
+    tbody.innerHTML = '';
+    
+    // Preencher com os dados do histórico
+    historico.forEach(dia => {
+        const tr = document.createElement('tr');
+        
+        // Criar células
+        const tdDia = document.createElement('td');
+        tdDia.textContent = dia.dia;
+        
+        const tdFaturamento = document.createElement('td');
+        tdFaturamento.textContent = `R$ ${formatarValor(dia.faturamento)}`;
+        
+        const tdMeta = document.createElement('td');
+        tdMeta.textContent = `R$ ${formatarValor(dia.meta)}`;
+        
+        const tdPercentual = document.createElement('td');
+        tdPercentual.textContent = `${dia.percentual}%`;
+        
+        // Adicionar classe de destaque se atingiu a meta
+        if (dia.percentual >= 100) {
+            tdPercentual.classList.add('meta-atingida');
+        } else {
+            tdPercentual.classList.add('meta-nao-atingida');
+        }
+        
+        // Adicionar células à linha
+        tr.appendChild(tdDia);
+        tr.appendChild(tdFaturamento);
+        tr.appendChild(tdMeta);
+        tr.appendChild(tdPercentual);
+        
+        // Adicionar linha à tabela
+        tbody.appendChild(tr);
+    });
+    
+    // Se não houver dados, mostrar mensagem
+    if (historico.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.textContent = 'Nenhum dado disponível para o período selecionado.';
+        td.style.textAlign = 'center';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    }
+}
+
+// Função para atualizar o gráfico de meta mensal vs. acumulado da loja
+function atualizarGraficoMetaMensalLoja(dados) {
+    // Atualizar valores
+    document.getElementById('loja-meta-mensal').textContent = formatarValor(dados.meta_mensal);
+    document.getElementById('loja-acumulado-mensal').textContent = formatarValor(dados.acumulado);
+    document.getElementById('loja-percentual-meta').textContent = dados.percentual;
+    
+    // Atualizar barra de progresso
+    document.getElementById('loja-barra-acumulado').style.width = `${Math.min(dados.percentual, 100)}%`;
 }
 
 // Função auxiliar para formatar valores monetários
