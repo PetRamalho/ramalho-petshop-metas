@@ -2,6 +2,16 @@ from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from src.models.user import User, MetaDiaria, FaturamentoDiario, Medalha, db # Import all necessary models
 from datetime import date, datetime
+import locale
+
+# Tente configurar o locale para português do Brasil
+try:
+    locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+except:
+    try:
+        locale.setlocale(locale.LC_TIME, 'Portuguese_Brazil')
+    except:
+        pass  # Se não conseguir configurar o locale, usará o padrão
 
 main_bp = Blueprint("main", __name__)
 
@@ -36,8 +46,16 @@ def dashboard_master():
     # Fetch data for master dashboard (consolidated and per store)
     # This is a placeholder, actual data fetching will be more complex
     lojas = User.query.filter_by(role="loja").all()
+    
+    # Obter o mês atual em português
+    current_month = datetime.now().strftime("%B de %Y").capitalize()
+    
     # Pass any necessary data to the template
-    return render_template("dashboard.html", usuario_master=True, lojas=lojas, nome_usuario=current_user.username)
+    return render_template("dashboard.html", 
+                          usuario_master=True, 
+                          lojas=lojas, 
+                          nome_usuario=current_user.username,
+                          current_month=current_month)
 
 @main_bp.route("/dashboard/loja")
 @login_required
@@ -48,12 +66,17 @@ def dashboard_loja():
     # Fetch data specific to this store
     # This is a placeholder
     data_atual = date.today().strftime("%d/%m/%Y")
+    
+    # Obter o mês atual em português
+    current_month = datetime.now().strftime("%B de %Y").capitalize()
+    
     # Pass any necessary data to the template
     return render_template("dashboard.html", 
                            usuario_loja=True, 
                            nome_loja=current_user.store_name, 
                            nome_usuario=current_user.username,
-                           data_atual=data_atual)
+                           data_atual=data_atual,
+                           current_month=current_month)
 
 @main_bp.route("/quadro-medalhas/historico")
 @login_required
@@ -64,4 +87,3 @@ def historico_medalhas():
     return render_template("historico_medalhas.html") # Needs this template created
 
 # Add other main application routes here (e.g., admin panel for master user)
-
