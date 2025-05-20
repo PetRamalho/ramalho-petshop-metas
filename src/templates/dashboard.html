@@ -9,6 +9,18 @@
     <h3>Mês Vigente: <span id="current-month">{{ current_month }}</span></h3>
 </div>
 <div class="dashboard-container">
+  <!-- Dados JSON para processamento pelo JavaScript -->
+{% if usuario_master and dados_lojas_json %}
+<script id="dados-lojas-json" type="application/json">{{ dados_lojas_json|safe }}</script>
+<span id="meta-grupo" style="display: none;">{{ meta_grupo }}</span>
+<span id="acumulado-grupo" style="display: none;">{{ acumulado_grupo }}</span>
+<span id="percentual-grupo" style="display: none;">{{ percentual_grupo }}</span>
+{% endif %}
+
+{% if usuario_loja and historico_json %}
+<script id="historico-json" type="application/json">{{ historico_json|safe }}</script>
+<script id="dados-meta-json" type="application/json">{{ dados_meta_json|safe }}</script>
+{% endif %}
     <div class="contador-regressivo" id="contador-regressivo">
         Contagem regressiva para o fim do mês: <span id="tempo-restante"></span>
     </div>
