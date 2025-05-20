@@ -45,3 +45,9 @@ def logout():
 # It might be useful to have a registration route for initial setup or if users can self-register in the future.
 # For now, users will be created manually or via a script.
 
+@auth_bp.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Você saiu do sistema.', 'info')
+    return redirect(url_for('auth.login'))
