@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, abort
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
+from flask_login import login_required, current_user, logout_user
 from src.models.user import User, MetaDiaria, FaturamentoDiario, Medalha, db # Import all necessary models
 from datetime import date, datetime
 import locale
+import calendar
 
 # Tente configurar o locale para português do Brasil
 try:
@@ -43,19 +44,38 @@ def dashboard_master():
     if current_user.role != "master":
         abort(403) # Forbidden access
     
+    # Obter o mês e ano selecionados do parâmetro da URL, ou usar o mês/ano atual como padrão
+    hoje = datetime.now()
+    selected_month = request.args.get('month', type=int, default=hoje.month)
+    selected_year = request.args.get('year', type=int, default=hoje.year)
+    
+    # Validar mês e ano
+    if selected_month < 1 or selected_month > 12:
+        selected_month = hoje.month
+    if selected_year < 2024 or selected_year > 2030:  # Ajuste o intervalo conforme necessário
+        selected_year = hoje.year
+    
+    # Obter o nome do mês em português
+    # Criar uma data com o mês selecionado para obter o nome do mês
+    temp_date = datetime(selected_year, selected_month, 1)
+    selected_month_name = temp_date.strftime("%B").capitalize()
+    
+    # Obter o mês atual em português (para o indicador de mês vigente)
+    current_month = hoje.strftime("%B de %Y").capitalize()
+    
     # Fetch data for master dashboard (consolidated and per store)
     # This is a placeholder, actual data fetching will be more complex
     lojas = User.query.filter_by(role="loja").all()
-    
-    # Obter o mês atual em português
-    current_month = datetime.now().strftime("%B de %Y").capitalize()
     
     # Pass any necessary data to the template
     return render_template("dashboard.html", 
                           usuario_master=True, 
                           lojas=lojas, 
                           nome_usuario=current_user.username,
-                          current_month=current_month)
+                          current_month=current_month,
+                          selected_month=selected_month,
+                          selected_year=selected_year,
+                          selected_month_name=selected_month_name)
 
 @main_bp.route("/dashboard/loja")
 @login_required
