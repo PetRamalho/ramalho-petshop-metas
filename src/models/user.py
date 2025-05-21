@@ -38,6 +38,8 @@ class MetaDiaria(db.Model):
     valor_meta = db.Column(db.Float, nullable=False)
     mes = db.Column(db.Integer, nullable=False) # Adicionado: mês da meta (1-12)
     ano = db.Column(db.Integer, nullable=False) # Adicionado: ano da meta
+    dia = db.Column(db.Integer, nullable=False) # Adicionado: dia da meta (1-31)
+    valor = db.Column(db.Float, nullable=False) # Adicionado: alias para valor_meta
 
     loja = db.relationship('User', backref=db.backref('metas_diarias', lazy=True))
 
@@ -50,6 +52,10 @@ class FaturamentoDiario(db.Model):
     data = db.Column(db.Date, nullable=False)
     valor_faturado = db.Column(db.Float, nullable=False)
     meta_atingida = db.Column(db.Boolean, default=False)
+    mes = db.Column(db.Integer, nullable=False) # Adicionado: mês do faturamento (1-12)
+    ano = db.Column(db.Integer, nullable=False) # Adicionado: ano do faturamento
+    dia = db.Column(db.Integer, nullable=False) # Adicionado: dia do faturamento (1-31)
+    valor = db.Column(db.Float, nullable=False) # Adicionado: alias para valor_faturado
 
     loja = db.relationship('User', backref=db.backref('faturamentos_diarios', lazy=True))
 
@@ -62,8 +68,9 @@ class Medalha(db.Model):
     mes = db.Column(db.Integer, nullable=False) # 1-12
     ano = db.Column(db.Integer, nullable=False)
     quantidade = db.Column(db.Integer, default=0)
+    dia = db.Column(db.Integer, nullable=False) # Adicionado: dia da medalha (1-31)
 
     loja = db.relationship('User', backref=db.backref('medalhas', lazy=True))
 
     def __repr__(self):
-        return f'<Medalha {self.loja.store_name} - {self.mes}/{self.ano} - {self.quantidade} medalhas>'
+        return f'<Medalha {self.loja.store_name} - {self.dia}/{self.mes}/{self.ano} - {self.quantidade} medalhas}>'
