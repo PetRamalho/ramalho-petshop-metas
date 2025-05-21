@@ -16,10 +16,10 @@ def create_users():
         db.create_all() # Garante que todas as tabelas existam
 
         users_data = [
-            {"username": "Adm", "password": "adm123", "role": "master", "store_name": None},
-            {"username": "alvarenga", "password": "alvarenga123", "role": "loja", "store_name": "Alvarenga"},
-            {"username": "corbisier", "password": "corbisier321", "role": "loja", "store_name": "Corbisier"},
-            {"username": "piraporinha", "password": "piraporinha321", "role": "loja", "store_name": "Piraporinha"}
+            {"username": "Adm", "password": "ramalho2025", "role": "master", "store_name": Ramalho Pet Shop},
+            {"username": "alvarenga", "password": "alvarenga2025", "role": "loja", "store_name": "Alvarenga"},
+            {"username": "corbisier", "password": "corbisier2025", "role": "loja", "store_name": "Corbisier"},
+            {"username": "piraporinha", "password": "piraporinha2025", "role": "loja", "store_name": "Piraporinha"}
         ]
 
         for user_data in users_data:
