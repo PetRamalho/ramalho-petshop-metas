@@ -22,6 +22,22 @@ except:
     except:
         pass  # Se não conseguir configurar o locale, usará o padrão
 
+# Mapeamento de meses em português
+MESES_PT = {
+    1: 'Janeiro',
+    2: 'Fevereiro',
+    3: 'Março',
+    4: 'Abril',
+    5: 'Maio',
+    6: 'Junho',
+    7: 'Julho',
+    8: 'Agosto',
+    9: 'Setembro',
+    10: 'Outubro',
+    11: 'Novembro',
+    12: 'Dezembro'
+}
+
 main_bp = Blueprint("main", __name__)
 
 @main_bp.record
@@ -163,12 +179,10 @@ def dashboard_master():
         selected_year = hoje.year
     
     # Obter o nome do mês em português
-    # Criar uma data com o mês selecionado para obter o nome do mês
-    temp_date = datetime(selected_year, selected_month, 1)
-    selected_month_name = temp_date.strftime("%B").capitalize()
+    selected_month_name = MESES_PT[selected_month]
     
     # Obter o mês atual em português (para o indicador de mês vigente)
-    current_month = hoje.strftime("%B de %Y").capitalize()
+    current_month = f"{MESES_PT[hoje.month]} de {hoje.year}"
     
     # Buscar todas as lojas
     lojas = User.query.filter_by(role="loja").all()
@@ -195,6 +209,21 @@ def dashboard_master():
     # Converter dados para JSON para uso no JavaScript
     dados_lojas_json = json.dumps(dados_lojas)
     
+    # Buscar medalhas para o quadro de medalhas
+    medalhas = Medalha.query.filter_by(
+        mes=selected_month,
+        ano=selected_year
+    ).all()
+    
+    # Agrupar medalhas por loja
+    medalhas_por_loja = {}
+    
+    for medalha in medalhas:
+        if medalha.loja_id not in medalhas_por_loja:
+            medalhas_por_loja[medalha.loja_id] = []
+        
+        medalhas_por_loja[medalha.loja_id].append(medalha)
+    
     # Pass any necessary data to the template
     return render_template("dashboard.html", 
                           usuario_master=True, 
@@ -208,7 +237,8 @@ def dashboard_master():
                           dados_lojas_json=dados_lojas_json,
                           acumulado_grupo=acumulado_grupo,
                           meta_grupo=meta_grupo,
-                          percentual_grupo=percentual_grupo)
+                          percentual_grupo=percentual_grupo,
+                          medalhas_por_loja=medalhas_por_loja)
 
 @main_bp.route("/dashboard/loja")
 @login_required
@@ -228,12 +258,10 @@ def dashboard_loja():
         selected_year = hoje.year
     
     # Obter o nome do mês em português
-    # Criar uma data com o mês selecionado para obter o nome do mês
-    temp_date = datetime(selected_year, selected_month, 1)
-    selected_month_name = temp_date.strftime("%B").capitalize()
+    selected_month_name = MESES_PT[selected_month]
     
     # Obter o mês atual em português (para o indicador de mês vigente)
-    current_month = hoje.strftime("%B de %Y").capitalize()
+    current_month = f"{MESES_PT[hoje.month]} de {hoje.year}"
     current_month_num = hoje.month
     current_year = hoje.year
     
@@ -258,6 +286,13 @@ def dashboard_loja():
     historico_json = json.dumps(historico)
     dados_meta_json = json.dumps(dados_meta)
     
+    # Buscar medalhas da loja para o mês/ano selecionado
+    medalhas = Medalha.query.filter_by(
+        mes=selected_month,
+        ano=selected_year,
+        loja_id=loja_id
+    ).all()
+    
     # Pass any necessary data to the template
     return render_template("dashboard.html", 
                            usuario_loja=True, 
@@ -275,7 +310,8 @@ def dashboard_loja():
                            dados_meta=dados_meta,
                            dados_meta_json=dados_meta_json,
                            dados_hoje=dados_hoje,
-                           dia_atual=dia_atual)
+                           dia_atual=dia_atual,
+                           medalhas=medalhas)
 
 @main_bp.route("/registrar_faturamento", methods=["POST"])
 @login_required
@@ -378,20 +414,56 @@ def admin():
     # Formatar dados para exibição
     metas_formatadas = []
     for mes, ano in metas_carregadas:
-        # Criar data para obter nome do mês
-        temp_date = datetime(ano, mes, 1)
-        mes_nome = temp_date.strftime("%B").capitalize()
+        # Usar o nome do mês em português
+        mes_nome = MESES_PT[mes]
         
         # Adicionar à lista formatada
         metas_formatadas.append({
             'mes': mes,
             'ano': ano,
             'mes_nome': mes_nome,
-            'data_upload': temp_date.strftime("%d/%m/%Y")
+            'data_upload': f"{mes}/{ano}"
         })
     
+    # Buscar todos os usuários para a funcionalidade de alteração de senha
+    usuarios = User.query.all()
+    
     return render_template("admin.html", 
-                           metas_carregadas=metas_formatadas)
+                           metas_carregadas=metas_formatadas,
+                           usuarios=usuarios)
+
+@main_bp.route("/alterar_senha", methods=["POST"])
+@login_required
+def alterar_senha():
+    if current_user.role != "master":
+        abort(403) # Forbidden access
+    
+    # Obter dados do formulário
+    usuario_id = request.form.get("usuario_id", type=int)
+    nova_senha = request.form.get("nova_senha")
+    confirmar_senha = request.form.get("confirmar_senha")
+    
+    # Validar dados
+    if not usuario_id or not nova_senha or not confirmar_senha:
+        flash("Dados inválidos. Por favor, tente novamente.", "danger")
+        return redirect(url_for("main.admin"))
+    
+    if nova_senha != confirmar_senha:
+        flash("As senhas não coincidem. Por favor, tente novamente.", "danger")
+        return redirect(url_for("main.admin"))
+    
+    # Buscar usuário
+    usuario = User.query.get(usuario_id)
+    if not usuario:
+        flash("Usuário não encontrado.", "danger")
+        return redirect(url_for("main.admin"))
+    
+    # Alterar senha
+    usuario.set_password(nova_senha)
+    db.session.commit()
+    
+    flash(f"Senha do usuário {usuario.username} alterada com sucesso!", "success")
+    return redirect(url_for("main.admin"))
 
 @main_bp.route("/upload-metas", methods=["POST"])
 @login_required
@@ -505,7 +577,7 @@ def upload_metas():
             # Remover arquivo temporário
             os.remove(temp_path)
             
-            flash(f"Metas para {calendar.month_name[mes]} de {ano} carregadas com sucesso!", "success")
+            flash(f"Metas para {MESES_PT[mes]} de {ano} carregadas com sucesso!", "success")
             return redirect(url_for("main.admin"))
             
         except Exception as e:
@@ -546,8 +618,7 @@ def historico_medalhas():
     lojas_dict = {loja.id: loja for loja in lojas}
     
     # Obter o nome do mês em português
-    temp_date = datetime(selected_year, selected_month, 1)
-    selected_month_name = temp_date.strftime("%B").capitalize()
+    selected_month_name = MESES_PT[selected_month]
     
     return render_template("historico_medalhas.html",
                            medalhas_por_loja=medalhas_por_loja,
@@ -590,8 +661,7 @@ def visualizar_metas():
     lojas_dict = {loja.id: loja for loja in lojas}
     
     # Obter o nome do mês em português
-    temp_date = datetime(ano, mes, 1)
-    mes_nome = temp_date.strftime("%B").capitalize()
+    mes_nome = MESES_PT[mes]
     
     return render_template("visualizar_metas.html",
                            metas_por_loja=metas_por_loja,
