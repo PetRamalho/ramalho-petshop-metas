@@ -32,6 +32,70 @@
         Carregando inspiração...
     </div>
 
+    <!-- Quadro de Medalhas Reformulado (lojas nas linhas) -->
+    <div class="card quadro-medalhas">
+        <h3 class="card-header">Quadro de Medalhas - {{ selected_month_name }} de {{ selected_year }}</h3>
+        <div class="quadro-medalhas-content">
+            <table class="tabela-medalhas">
+                <thead>
+                    <tr>
+                        <th>Loja</th>
+                        <th>Medalhas</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if usuario_master %}
+                        {% for loja in lojas %}
+                        <tr>
+                            <td class="nome-loja">{{ loja.store_name }}</td>
+                            <td class="medalhas-loja">
+                                {% if loja.id in medalhas_por_loja %}
+                                    {% for medalha in medalhas_por_loja[loja.id] %}
+                                        <span class="medalha" title="Meta atingida em {{ medalha.dia }}/{{ medalha.mes }}/{{ medalha.ano }}">🏅</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="sem-medalhas">Nenhuma medalha no período</span>
+                                {% endif %}
+                            </td>
+                            <td class="total-medalhas">
+                                {% if loja.id in medalhas_por_loja %}
+                                    {{ medalhas_por_loja[loja.id]|length }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% elif usuario_loja %}
+                        <tr>
+                            <td class="nome-loja">{{ nome_loja }}</td>
+                            <td class="medalhas-loja">
+                                {% if medalhas %}
+                                    {% for medalha in medalhas %}
+                                        <span class="medalha" title="Meta atingida em {{ medalha.dia }}/{{ medalha.mes }}/{{ medalha.ano }}">🏅</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="sem-medalhas">Nenhuma medalha no período</span>
+                                {% endif %}
+                            </td>
+                            <td class="total-medalhas">
+                                {% if medalhas %}
+                                    {{ medalhas|length }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div class="quadro-medalhas-footer">
+            <a href="{{ url_for('main.historico_medalhas') }}" class="btn btn-secundario btn-sm">Ver Histórico Completo</a>
+        </div>
+    </div>
+
     <!-- Seção Master (Visível apenas para Vinícius Ramalho) -->
     {% if usuario_master %}
     <div class="card painel-master">
@@ -75,13 +139,13 @@
         <div class="grid-metas">
             <div class="meta-consolidada">
                 <h3>Total Geral do Grupo</h3>
-                <p>Faturamento Diário: R$ <span id="master-faturamento-diario-total">0,00</span></p>
-                <p>Meta Diária: R$ <span id="master-meta-diaria-total">0,00</span></p>
-                <p>Atingido: <span id="master-percentual-total">0</span>%</p>
+                <p>Faturamento Diário: R$ <span id="master-faturamento-diario-total">{{ acumulado_grupo|default('0,00') }}</span></p>
+                <p>Meta Diária: R$ <span id="master-meta-diaria-total">{{ meta_grupo|default('0,00') }}</span></p>
+                <p>Atingido: <span id="master-percentual-total">{{ percentual_grupo|default('0') }}</span>%</p>
                 <div class="barra-progresso">
-                    <div class="progresso-atual" id="master-progresso-total" style="width: 0%;">0%</div>
+                    <div class="progresso-atual" id="master-progresso-total" style="width: {{ percentual_grupo|default('0') }}%;">{{ percentual_grupo|default('0') }}%</div>
                 </div>
-                <p>Acumulado no Mês: R$ <span id="master-acumulado-mes-total">0,00</span></p>
+                <p>Acumulado no Mês: R$ <span id="master-acumulado-mes-total">{{ acumulado_grupo|default('0,00') }}</span></p>
             </div>
         </div>
         
@@ -91,20 +155,20 @@
             <div class="grafico-container">
                 <div class="grafico-barra">
                     <div class="grafico-label">Meta Mensal</div>
-                    <div class="grafico-valor">R$ <span id="meta-mensal-grupo">580.000,00</span></div>
+                    <div class="grafico-valor">R$ <span id="meta-mensal-grupo">{{ meta_grupo|default('0,00') }}</span></div>
                     <div class="barra-meta">
                         <div class="barra-preenchimento" style="width: 100%;"></div>
                     </div>
                 </div>
                 <div class="grafico-barra">
                     <div class="grafico-label">Acumulado</div>
-                    <div class="grafico-valor">R$ <span id="acumulado-mensal-grupo">0,00</span></div>
+                    <div class="grafico-valor">R$ <span id="acumulado-mensal-grupo">{{ acumulado_grupo|default('0,00') }}</span></div>
                     <div class="barra-acumulado">
-                        <div class="barra-preenchimento" id="barra-acumulado-grupo" style="width: 0%;"></div>
+                        <div class="barra-preenchimento" id="barra-acumulado-grupo" style="width: {{ percentual_grupo|default('0') }}%;"></div>
                     </div>
                 </div>
                 <div class="grafico-percentual">
-                    <span id="percentual-meta-grupo">0</span>% da meta mensal atingida
+                    <span id="percentual-meta-grupo">{{ percentual_grupo|default('0') }}</span>% da meta mensal atingida
                 </div>
             </div>
         </div>
@@ -116,13 +180,13 @@
             {% for loja in lojas %}
             <div class="card-loja-master">
                 <h4 class="nome-loja">{{ loja.store_name }}</h4>
-                <p>Faturamento Diário: R$ <span id="master-faturamento-{{ loja.id }}">0,00</span></p>
-                <p>Meta Diária: R$ <span id="master-meta-{{ loja.id }}">0,00</span></p>
-                <p>Atingido: <span id="master-percentual-{{ loja.id }}">0</span>%</p>
+                <p>Faturamento Diário: R$ <span id="master-faturamento-{{ loja.id }}">{{ dados_lojas[loja.id].meta_mensal.acumulado|default('0,00') }}</span></p>
+                <p>Meta Diária: R$ <span id="master-meta-{{ loja.id }}">{{ dados_lojas[loja.id].meta_mensal.meta_mensal|default('0,00') }}</span></p>
+                <p>Atingido: <span id="master-percentual-{{ loja.id }}">{{ dados_lojas[loja.id].meta_mensal.percentual|default('0') }}</span>%</p>
                 <div class="barra-progresso">
-                    <div class="progresso-atual" id="master-progresso-{{ loja.id }}" style="width: 0%;">0%</div>
+                    <div class="progresso-atual" id="master-progresso-{{ loja.id }}" style="width: {{ dados_lojas[loja.id].meta_mensal.percentual|default('0') }}%;">{{ dados_lojas[loja.id].meta_mensal.percentual|default('0') }}%</div>
                 </div>
-                <p>Acumulado no Mês: R$ <span id="master-acumulado-{{ loja.id }}">0,00</span></p>
+                <p>Acumulado no Mês: R$ <span id="master-acumulado-{{ loja.id }}">{{ dados_lojas[loja.id].meta_mensal.acumulado|default('0,00') }}</span></p>
                 
                 <!-- Tabela de Histórico Diário -->
                 <div class="historico-diario-container">
@@ -139,7 +203,14 @@
                             </thead>
                             <tbody id="historico-diario-{{ loja.id }}">
                                 <!-- Dados serão carregados dinamicamente -->
-                                <tr><td colspan="4">Carregando dados...</td></tr>
+                                {% for dia in dados_lojas[loja.id].historico %}
+                                <tr>
+                                    <td>{{ dia.dia }}</td>
+                                    <td>R$ {{ dia.faturamento|default('0,00') }}</td>
+                                    <td>R$ {{ dia.meta|default('0,00') }}</td>
+                                    <td class="{% if dia.percentual >= 100 %}meta-atingida{% else %}meta-nao-atingida{% endif %}">{{ dia.percentual|default('0') }}%</td>
+                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -151,20 +222,20 @@
                     <div class="grafico-container">
                         <div class="grafico-barra">
                             <div class="grafico-label">Meta Mensal</div>
-                            <div class="grafico-valor">R$ <span id="meta-mensal-{{ loja.id }}">0,00</span></div>
+                            <div class="grafico-valor">R$ <span id="meta-mensal-{{ loja.id }}">{{ dados_lojas[loja.id].meta_mensal.meta_mensal|default('0,00') }}</span></div>
                             <div class="barra-meta">
                                 <div class="barra-preenchimento" style="width: 100%;"></div>
                             </div>
                         </div>
                         <div class="grafico-barra">
                             <div class="grafico-label">Acumulado</div>
-                            <div class="grafico-valor">R$ <span id="acumulado-mensal-{{ loja.id }}">0,00</span></div>
+                            <div class="grafico-valor">R$ <span id="acumulado-mensal-{{ loja.id }}">{{ dados_lojas[loja.id].meta_mensal.acumulado|default('0,00') }}</span></div>
                             <div class="barra-acumulado">
-                                <div class="barra-preenchimento" id="barra-acumulado-{{ loja.id }}" style="width: 0%;"></div>
+                                <div class="barra-preenchimento" id="barra-acumulado-{{ loja.id }}" style="width: {{ dados_lojas[loja.id].meta_mensal.percentual|default('0') }}%;"></div>
                             </div>
                         </div>
                         <div class="grafico-percentual">
-                            <span id="percentual-meta-{{ loja.id }}">0</span>% da meta mensal atingida
+                            <span id="percentual-meta-{{ loja.id }}">{{ dados_lojas[loja.id].meta_mensal.percentual|default('0') }}</span>% da meta mensal atingida
                         </div>
                     </div>
                 </div>
@@ -235,13 +306,13 @@
         <hr style="margin: 20px 0;">
         <div class="meta-info">
             <h3>Meta do Dia</h3>
-            <p>Sua meta para hoje: R$ <span id="loja-meta-diaria">0,00</span></p>
-            <p>Faturamento Registrado: R$ <span id="loja-faturamento-registrado">0,00</span></p>
-            <p>Percentual Atingido: <span id="loja-percentual-atingido">0</span>%</p>
+            <p>Sua meta para hoje: R$ <span id="loja-meta-diaria">{{ dados_hoje.meta|default('0,00') }}</span></p>
+            <p>Faturamento Registrado: R$ <span id="loja-faturamento-registrado">{{ dados_hoje.faturamento|default('0,00') }}</span></p>
+            <p>Percentual Atingido: <span id="loja-percentual-atingido">{{ dados_hoje.percentual|default('0') }}</span>%</p>
             <div class="barra-progresso">
-                <div class="progresso-atual" id="loja-progresso-diario" style="width: 0%;">0%</div>
+                <div class="progresso-atual" id="loja-progresso-diario" style="width: {{ dados_hoje.percentual|default('0') }}%;">{{ dados_hoje.percentual|default('0') }}%</div>
             </div>
-            <p>Total Acumulado no Mês: R$ <span id="loja-acumulado-mes">0,00</span></p>
+            <p>Total Acumulado no Mês: R$ <span id="loja-acumulado-mes">{{ dados_meta.acumulado|default('0,00') }}</span></p>
         </div>
         
         <!-- Gráficos detalhados para a loja (iguais aos do administrador) -->
@@ -254,20 +325,20 @@
             <div class="grafico-container">
                 <div class="grafico-barra">
                     <div class="grafico-label">Meta Mensal</div>
-                    <div class="grafico-valor">R$ <span id="loja-meta-mensal">0,00</span></div>
+                    <div class="grafico-valor">R$ <span id="loja-meta-mensal">{{ dados_meta.meta_mensal|default('0,00') }}</span></div>
                     <div class="barra-meta">
                         <div class="barra-preenchimento" style="width: 100%;"></div>
                     </div>
                 </div>
                 <div class="grafico-barra">
                     <div class="grafico-label">Acumulado</div>
-                    <div class="grafico-valor">R$ <span id="loja-acumulado-mensal">0,00</span></div>
+                    <div class="grafico-valor">R$ <span id="loja-acumulado-mensal">{{ dados_meta.acumulado|default('0,00') }}</span></div>
                     <div class="barra-acumulado">
-                        <div class="barra-preenchimento" id="loja-barra-acumulado" style="width: 0%;"></div>
+                        <div class="barra-preenchimento" id="loja-barra-acumulado" style="width: {{ dados_meta.percentual|default('0') }}%;"></div>
                     </div>
                 </div>
                 <div class="grafico-percentual">
-                    <span id="loja-percentual-meta">0</span>% da meta mensal atingida
+                    <span id="loja-percentual-meta">{{ dados_meta.percentual|default('0') }}</span>% da meta mensal atingida
                 </div>
             </div>
         </div>
@@ -286,8 +357,14 @@
                         </tr>
                     </thead>
                     <tbody id="loja-historico-diario">
-                        <!-- Dados serão carregados dinamicamente -->
-                        <tr><td colspan="4">Carregando dados...</td></tr>
+                        {% for dia in historico %}
+                        <tr>
+                            <td>{{ dia.dia }}</td>
+                            <td>R$ {{ dia.faturamento|default('0,00') }}</td>
+                            <td>R$ {{ dia.meta|default('0,00') }}</td>
+                            <td class="{% if dia.percentual >= 100 %}meta-atingida{% else %}meta-nao-atingida{% endif %}">{{ dia.percentual|default('0') }}%</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -295,59 +372,69 @@
     </div>
     {% endif %}
 
-    <!-- Quadro de Medalhas (Público) -->
-    <div class="card quadro-medalhas-container">
-        <h2 class="card-header">Quadro de Medalhas do Mês</h2>
-        <div class="quadro-medalhas" id="quadro-medalhas-geral">
-            <!-- Medalhas serão carregadas aqui (ex: Alvarenga: 🏆🏆, Corbisier: 🏆) -->
-            <p>Carregando medalhas...</p>
-        </div>
-        <div class="historico-medalhas-link">
-            <a href="{{ url_for('main.historico_medalhas') }}" class="btn btn-secundario">Ver Histórico de Medalhas</a>
-        </div>
+    <!-- Link para o Quadro de Medalhas -->
+    <div class="acoes-dashboard">
+        <a href="{{ url_for('main.historico_medalhas') }}" class="btn btn-secundario">Ver Quadro de Medalhas</a>
+        {% if usuario_master %}
+        <a href="{{ url_for('main.admin') }}" class="btn btn-principal">Painel Administrativo</a>
+        {% endif %}
     </div>
-
-    <!-- Destaques do Dia -->
-    <div id="destaques-do-dia">
-        <!-- Mensagens de destaque aparecerão aqui -->
-    </div>
-
-    <!-- Alerta de Bônus -->
-    <div id="alerta-bonus-equipe" class="alerta alerta-bonus" style="display: none;">
-        🎉 Bônus de R$ 500 liberado para toda a equipe! 🎉
-    </div>
-
 </div>
 
 <style>
-.dashboard-container {
+/* Estilos para o quadro de medalhas reformulado */
+.quadro-medalhas {
+    margin-bottom: 2rem;
+}
+.quadro-medalhas-content {
     padding: 1rem;
+    overflow-x: auto;
 }
-.grid-metas, .grid-lojas-master {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
+.tabela-medalhas {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
 }
-.meta-consolidada, .card-loja-master, .painel-loja .meta-info {
-    padding: 1rem;
-    border: 1px solid var(--cor-fundo-escuro);
-    border-radius: 5px;
-    background-color: #fff;
+.tabela-medalhas th, 
+.tabela-medalhas td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--cor-fundo-escuro);
 }
-.painel-loja .meta-info h3, .meta-consolidada h3, .card-loja-master h4 {
+.tabela-medalhas th {
+    background-color: var(--cor-fundo-escuro);
+    color: var(--cor-texto-claro);
+}
+.nome-loja {
+    font-weight: bold;
     color: var(--cor-roxo-principal);
-    margin-bottom: 0.5rem;
 }
-.quadro-medalhas-container {
-    margin-top: 2rem;
+.medalhas-loja {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
 }
-.historico-medalhas-link {
+.medalha {
+    font-size: 0.75em; /* Reduzido pela metade */
+    cursor: help;
+}
+.total-medalhas {
+    font-weight: bold;
     text-align: center;
-    margin-top: 1rem;
 }
-#destaques-do-dia .alerta {
-    margin-top: 1rem;
+.sem-medalhas {
+    color: #999;
+    font-style: italic;
+}
+.quadro-medalhas-footer {
+    padding: 1rem;
+    text-align: center;
+}
+.acoes-dashboard {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 </style>
 
