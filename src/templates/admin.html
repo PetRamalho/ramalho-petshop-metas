@@ -14,6 +14,10 @@
         {% endif %}
     {% endwith %}
 
+    <div class="admin-actions">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-principal">Voltar ao Painel Principal</a>
+    </div>
+
     <div class="admin-section">
         <h3>Gerenciar Metas Mensais</h3>
         <form method="POST" action="{{ url_for('main.upload_metas') }}" enctype="multipart/form-data">
@@ -92,12 +96,64 @@
     <hr style="margin: 30px 0;">
 
     <div class="admin-section">
-        <h3>Outras Ações Administrativas</h3>
-        <p><em>(Mais funcionalidades administrativas serão adicionadas aqui, como visualização de metas carregadas, edição manual, etc.)</em></p>
-        <!-- Exemplo: Link para futuras funcionalidades -->
-        <!-- <a href="#" class="btn btn-secundario">Gerenciar Usuários</a> -->
+        <h3>Gerenciar Usuários</h3>
+        <div class="usuarios-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Loja</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if usuarios %}
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.username }}</td>
+                            <td>{{ usuario.store_name }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secundario" onclick="abrirModalSenha('{{ usuario.id }}', '{{ usuario.username }}')">Alterar Senha</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center">Nenhum usuário encontrado.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
+</div>
 
+<!-- Modal para alteração de senha -->
+<div id="modal-alterar-senha" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="fecharModalSenha()">&times;</span>
+        <h3>Alterar Senha</h3>
+        <p>Alterando senha para o usuário: <span id="nome-usuario-senha"></span></p>
+        
+        <form id="form-alterar-senha" method="POST" action="{{ url_for('main.alterar_senha') }}">
+            <input type="hidden" id="usuario-id" name="usuario_id">
+            
+            <div class="form-group">
+                <label for="nova-senha">Nova Senha:</label>
+                <input type="password" id="nova-senha" name="nova_senha" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmar-senha">Confirmar Nova Senha:</label>
+                <input type="password" id="confirmar-senha" name="confirmar_senha" class="form-control" required>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secundario" onclick="fecharModalSenha()">Cancelar</button>
+                <button type="submit" class="btn btn-principal">Salvar Nova Senha</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <style>
@@ -105,6 +161,10 @@
     max-width: 800px;
     margin: 2rem auto;
     padding: 2rem;
+}
+.admin-actions {
+    margin-bottom: 1.5rem;
+    text-align: right;
 }
 .admin-section {
     margin-bottom: 2rem;
@@ -151,5 +211,83 @@
         max-width: 100%;
     }
 }
+
+/* Estilos para o modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
 </style>
+
+<script>
+// Funções para o modal de alteração de senha
+function abrirModalSenha(usuarioId, usuarioNome) {
+    document.getElementById('usuario-id').value = usuarioId;
+    document.getElementById('nome-usuario-senha').textContent = usuarioNome;
+    document.getElementById('modal-alterar-senha').style.display = 'block';
+}
+
+function fecharModalSenha() {
+    document.getElementById('modal-alterar-senha').style.display = 'none';
+    document.getElementById('form-alterar-senha').reset();
+}
+
+// Validação do formulário de alteração de senha
+document.getElementById('form-alterar-senha').addEventListener('submit', function(event) {
+    const novaSenha = document.getElementById('nova-senha').value;
+    const confirmarSenha = document.getElementById('confirmar-senha').value;
+    
+    if (novaSenha !== confirmarSenha) {
+        alert('As senhas não coincidem. Por favor, tente novamente.');
+        event.preventDefault();
+    }
+});
+
+// Fechar o modal se o usuário clicar fora dele
+window.onclick = function(event) {
+    const modal = document.getElementById('modal-alterar-senha');
+    if (event.target == modal) {
+        fecharModalSenha();
+    }
+}
+</script>
 {% endblock %}
