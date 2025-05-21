@@ -28,7 +28,7 @@ def create_app():
                 role="master",
                 store_name="Ramalho Pet Shop"
             )
-            master.set_password("ramalho2025")
+            master.set_password("adm123")
             
             # Criar usuários de loja
             alvarenga = User(
@@ -36,21 +36,21 @@ def create_app():
                 role="loja",
                 store_name="Alvarenga"
             )
-            alvarenga.set_password("alvarenga2025")
+            alvarenga.set_password("alvarenga123")
             
             corbisier = User(
                 username="corbisier",
                 role="loja",
                 store_name="Corbisier"
             )
-            corbisier.set_password("corbisier2025")
+            corbisier.set_password("corbisier321")
             
             piraporinha = User(
                 username="piraporinha",
                 role="loja",
                 store_name="Piraporinha"
             )
-            piraporinha.set_password("piraporinha2025")
+            piraporinha.set_password("piraporinha321")
             
             # Adicionar usuários ao banco de dados
             db.session.add(master)
