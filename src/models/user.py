@@ -73,4 +73,4 @@ class Medalha(db.Model):
     loja = db.relationship('User', backref=db.backref('medalhas', lazy=True))
 
     def __repr__(self):
-        return f'<Medalha {self.loja.store_name} - {self.dia}/{self.mes}/{self.ano} - {self.quantidade} medalhas}>'
+        return f'<Medalha {self.loja.store_name} - {self.dia}/{self.mes}/{self.ano} - {self.quantidade} medalhas>'
