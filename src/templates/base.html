@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> <!-- Usando Roboto como fallback, idealmente Graviola Soft -->
-    <script src="{{ url_for("static", filename="js/main.js") }}" defer></script>
+    <script src="{{ url_for("static", filename="js/main.js" ) }}" defer></script>
 </head>
 <body>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
@@ -18,13 +18,16 @@
             <img src="{{ url_for("static", filename="img/logo.jpg") }}" alt="Logo Ramalho Pet Shop" id="logo">
             <h1>Painel de Metas</h1>
         </div>
-        <!-- Adicione isso na barra de navegação, geralmente próximo ao logo -->
-<div class="header-right">
-    {% if current_user.is_authenticated %}
-        <span class="user-info">Olá, {{ current_user.username }}</span>
-        <a href="{{ url_for('auth.logout') }}" class="logout-btn">Sair</a>
-    {% endif %}
-</div>
+        <!-- Barra de navegação com links para áreas do sistema -->
+        <div class="header-right">
+            {% if current_user.is_authenticated %}
+                <span class="user-info">Olá, {{ current_user.username }}</span>
+                {% if current_user.role == "master" %}
+                    <a href="{{ url_for('main.admin') }}" class="admin-btn">Painel Admin</a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="logout-btn">Sair</a>
+            {% endif %}
+        </div>
     </header>
 
     <main class="container">
@@ -41,4 +44,3 @@
     </footer>
 </body>
 </html>
-
