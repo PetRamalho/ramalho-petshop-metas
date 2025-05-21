@@ -182,20 +182,16 @@ function inicializarPainelLoja() {
         // Atualizar o gráfico de meta mensal
         atualizarGraficoMetaMensalLoja(dadosMeta);
         
-        // Atualizar dados do dia atual
-        const diaAtual = new Date().getDate();
-        const dadosDia = historico.find(dia => dia.dia === diaAtual) || historico[historico.length - 1];
-        
-        if (dadosDia) {
-            document.getElementById('loja-meta-diaria').textContent = formatarValor(dadosDia.meta);
-            document.getElementById('loja-faturamento-registrado').textContent = formatarValor(dadosDia.faturamento);
-            document.getElementById('loja-percentual-atingido').textContent = dadosDia.percentual;
-            document.getElementById('loja-progresso-diario').style.width = `${Math.min(dadosDia.percentual, 100)}%`;
-            document.getElementById('loja-progresso-diario').textContent = `${dadosDia.percentual}%`;
+        // NÃO sobrescrever os dados do dia atual - usar os valores do backend
+        // Apenas atualizar a barra de progresso
+        const percentualElement = document.getElementById('loja-percentual-atingido');
+        if (percentualElement) {
+            const percentual = parseFloat(percentualElement.textContent);
+            const progressoElement = document.getElementById('loja-progresso-diario');
+            if (progressoElement) {
+                progressoElement.style.width = `${Math.min(percentual, 100)}%`;
+            }
         }
-        
-        // Atualizar acumulado do mês
-        document.getElementById('loja-acumulado-mes').textContent = formatarValor(dadosMeta.acumulado);
         
     } catch (error) {
         console.error('Erro ao processar dados da loja:', error);
@@ -274,3 +270,15 @@ function formatarValor(valor) {
         maximumFractionDigits: 2
     });
 }
+
+// Remover qualquer interceptação do formulário de faturamento
+document.addEventListener('DOMContentLoaded', function() {
+    const formFaturamento = document.getElementById('form-faturamento-diario');
+    if (formFaturamento) {
+        // Garantir que o formulário seja submetido normalmente sem interceptação
+        formFaturamento.addEventListener('submit', function(event) {
+            // Não prevenir o comportamento padrão - deixar o formulário ser enviado normalmente
+            // Não mostrar mensagem de simulação
+        });
+    }
+});
