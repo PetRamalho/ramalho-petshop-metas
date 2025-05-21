@@ -36,6 +36,8 @@ class MetaDiaria(db.Model):
     loja_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # Foreign key to User table (loja users)
     data = db.Column(db.Date, nullable=False)
     valor_meta = db.Column(db.Float, nullable=False)
+    mes = db.Column(db.Integer, nullable=False) # Adicionado: mês da meta (1-12)
+    ano = db.Column(db.Integer, nullable=False) # Adicionado: ano da meta
 
     loja = db.relationship('User', backref=db.backref('metas_diarias', lazy=True))
 
@@ -65,4 +67,3 @@ class Medalha(db.Model):
 
     def __repr__(self):
         return f'<Medalha {self.loja.store_name} - {self.mes}/{self.ano} - {self.quantidade} medalhas>'
-
