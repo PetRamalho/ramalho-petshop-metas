@@ -312,6 +312,8 @@ def registrar_faturamento():
     if faturamento_existente:
         # Atualizar registro existente
         faturamento_existente.valor = faturamento
+        faturamento_existente.valor_faturado = faturamento
+        faturamento_existente.data = data
         db.session.commit()
         flash(f"Faturamento do dia {dia}/{mes}/{ano} atualizado com sucesso!", "success")
     else:
@@ -321,6 +323,8 @@ def registrar_faturamento():
             mes=mes,
             ano=ano,
             valor=faturamento,
+            valor_faturado=faturamento,
+            data=data,
             loja_id=current_user.id
         )
         db.session.add(novo_faturamento)
@@ -350,11 +354,12 @@ def registrar_faturamento():
                 dia=dia,
                 mes=mes,
                 ano=ano,
-                loja_id=current_user.id
+                loja_id=current_user.id,
+                quantidade=1
             )
             db.session.add(nova_medalha)
             db.session.commit()
-            flash(f"Parabéns! Você ganhou uma medalha por atingir a meta do dia {dia}/{mes}/{ano}! 🏆", "success")
+            flash(f"Parabéns! Você ganhou uma medalha por atingir a meta do dia {dia}/{mes}/{ano}! 🏅", "success")
     
     return redirect(url_for("main.dashboard_loja", month=mes, year=ano))
 
@@ -364,11 +369,29 @@ def admin():
     if current_user.role != "master":
         abort(403) # Forbidden access
     
-    # Buscar metas carregadas (placeholder)
-    metas_carregadas = []
+    # Buscar metas carregadas
+    metas_carregadas = db.session.query(
+        db.func.distinct(MetaDiaria.mes),
+        MetaDiaria.ano
+    ).order_by(MetaDiaria.ano.desc(), MetaDiaria.mes.desc()).all()
+    
+    # Formatar dados para exibição
+    metas_formatadas = []
+    for mes, ano in metas_carregadas:
+        # Criar data para obter nome do mês
+        temp_date = datetime(ano, mes, 1)
+        mes_nome = temp_date.strftime("%B").capitalize()
+        
+        # Adicionar à lista formatada
+        metas_formatadas.append({
+            'mes': mes,
+            'ano': ano,
+            'mes_nome': mes_nome,
+            'data_upload': temp_date.strftime("%d/%m/%Y")
+        })
     
     return render_template("admin.html", 
-                           metas_carregadas=metas_carregadas)
+                           metas_carregadas=metas_formatadas)
 
 @main_bp.route("/upload-metas", methods=["POST"])
 @login_required
@@ -448,10 +471,17 @@ def upload_metas():
                     if pd.notna(row['Dia']) and pd.notna(row['Meta']):
                         try:
                             dia = int(row['Dia'])
-                            meta = float(row['Meta'])
+                            meta_valor = float(row['Meta'])
                             
                             # Verificar se o dia é válido
                             if dia < 1 or dia > 31:
+                                continue
+                            
+                            # Criar data
+                            try:
+                                data = date(ano, mes, dia)
+                            except ValueError:
+                                # Dia inválido para o mês
                                 continue
                             
                             # Criar nova meta
@@ -459,7 +489,9 @@ def upload_metas():
                                 dia=dia,
                                 mes=mes,
                                 ano=ano,
-                                valor=meta,
+                                valor=meta_valor,
+                                valor_meta=meta_valor,
+                                data=data,
                                 loja_id=loja_id
                             )
                             db.session.add(nova_meta)
