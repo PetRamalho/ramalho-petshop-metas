@@ -16,6 +16,51 @@ def create_app():
     # Inicializar extensões
     db.init_app(app)
     
+    # Criar tabelas ao iniciar o aplicativo
+    with app.app_context():
+        db.create_all()
+        
+        # Verificar se já existem usuários
+        if User.query.count() == 0:
+            # Criar usuário master
+            master = User(
+                username="adm",
+                role="master",
+                store_name="Ramalho Pet Shop"
+            )
+            master.set_password("ramalho2025")
+            
+            # Criar usuários de loja
+            alvarenga = User(
+                username="alvarenga",
+                role="loja",
+                store_name="Alvarenga"
+            )
+            alvarenga.set_password("alvarenga2025")
+            
+            corbisier = User(
+                username="corbisier",
+                role="loja",
+                store_name="Corbisier"
+            )
+            corbisier.set_password("corbisier2025")
+            
+            piraporinha = User(
+                username="piraporinha",
+                role="loja",
+                store_name="Piraporinha"
+            )
+            piraporinha.set_password("piraporinha2025")
+            
+            # Adicionar usuários ao banco de dados
+            db.session.add(master)
+            db.session.add(alvarenga)
+            db.session.add(corbisier)
+            db.session.add(piraporinha)
+            
+            # Commit das alterações
+            db.session.commit()
+    
     # Configurar login manager
     login_manager = LoginManager()
     login_manager.init_app(app)
