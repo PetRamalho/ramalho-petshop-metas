@@ -285,24 +285,24 @@
             </form>
         </div>
         
-        <form id="form-faturamento-diario" method="POST" action="{{ url_for('main.registrar_faturamento') }}">
-            <div class="form-group">
-                <label for="dia-faturamento">Selecione o Dia:</label>
-                <select id="dia-faturamento" name="dia" class="form-control">
-                    {% for i in range(1, 32) %}
-                        <option value="{{ i }}" {% if i == dia_atual %}selected{% endif %}>{{ i }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="faturamento-dia">Registrar Faturamento do Dia:</label>
-                <input type="number" id="faturamento-dia" name="faturamento" step="0.01" min="0" required class="form-control">
-            </div>
-            <input type="hidden" name="mes" value="{{ selected_month|default(current_month_num) }}">
-            <input type="hidden" name="ano" value="{{ selected_year|default(current_year) }}">
-            <button type="submit" class="btn btn-principal">Salvar Faturamento</button>
-        </form>
-        
+      <form id="form-faturamento-diario" method="POST" action="{{ url_for('main.registrar_faturamento') }}">
+    <div class="form-group">
+        <label for="dia-faturamento">Selecione o Dia:</label>
+        <select id="dia-faturamento" name="dia" class="form-control">
+            {% for i in range(1, 32) %}
+                <option value="{{ i }}" {% if i == dia_atual %}selected{% endif %}>{{ i }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="faturamento-dia">Registrar Faturamento do Dia:</label>
+        <input type="number" id="faturamento-dia" name="faturamento" step="0.01" min="0" required class="form-control">
+    </div>
+    <input type="hidden" name="mes" value="{{ selected_month|default(current_month_num) }}">
+    <input type="hidden" name="ano" value="{{ selected_year|default(current_year) }}">
+    <button type="submit" class="btn btn-principal">Salvar Faturamento</button>
+</form>
+
         <hr style="margin: 20px 0;">
         <div class="meta-info">
             <h3>Meta do Dia</h3>
