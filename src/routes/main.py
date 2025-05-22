@@ -473,124 +473,106 @@ def upload_metas():
     
     # Verificar se o arquivo foi enviado
     if 'metas_file' not in request.files:
-        flash("Nenhum arquivo enviado.", "danger")
-        return redirect(url_for("main.admin"))
+        flash('Nenhum arquivo selecionado.', 'danger')
+        return redirect(url_for('main.admin'))
     
     file = request.files['metas_file']
     
     # Verificar se o arquivo tem nome
     if file.filename == '':
-        flash("Nenhum arquivo selecionado.", "danger")
-        return redirect(url_for("main.admin"))
+        flash('Nenhum arquivo selecionado.', 'danger')
+        return redirect(url_for('main.admin'))
+    
+    # Verificar se o arquivo é permitido
+    if not file.filename.endswith('.xlsx'):
+        flash('Formato de arquivo inválido. Por favor, envie um arquivo .xlsx.', 'danger')
+        return redirect(url_for('main.admin'))
     
     # Obter mês e ano selecionados
-    mes = request.form.get("mes_meta", type=int)
-    ano = request.form.get("ano_meta", type=int)
+    mes = request.form.get('mes_meta', type=int)
+    ano = request.form.get('ano_meta', type=int)
     
     if not mes or not ano:
-        flash("Mês e ano são obrigatórios.", "danger")
-        return redirect(url_for("main.admin"))
+        flash('Mês e ano são obrigatórios.', 'danger')
+        return redirect(url_for('main.admin'))
     
-    # Verificar se o arquivo é um Excel
-    if file and file.filename.endswith('.xlsx'):
-        # Salvar o arquivo temporariamente
-        filename = secure_filename(file.filename)
-        temp_path = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(temp_path)
+    # Salvar o arquivo
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
+    
+    try:
+        # Processar o arquivo Excel
+        df = pd.read_excel(filepath)
         
-        try:
-            # Processar o arquivo Excel
-            xls = pd.ExcelFile(temp_path)
+        # Verificar se as colunas necessárias existem
+        colunas_necessarias = ['Dia', 'Alvarenga', 'Corbisier', 'Piraporinha']
+        for coluna in colunas_necessarias:
+            if coluna not in df.columns:
+                flash(f'Coluna {coluna} não encontrada no arquivo.', 'danger')
+                return redirect(url_for('main.admin'))
+        
+        # Buscar lojas
+        lojas = {
+            'Alvarenga': User.query.filter_by(store_name='Alvarenga').first(),
+            'Corbisier': User.query.filter_by(store_name='Corbisier').first(),
+            'Piraporinha': User.query.filter_by(store_name='Piraporinha').first()
+        }
+        
+        # Verificar se todas as lojas foram encontradas
+        for nome_loja, loja in lojas.items():
+            if not loja:
+                flash(f'Loja {nome_loja} não encontrada no banco de dados.', 'danger')
+                return redirect(url_for('main.admin'))
+        
+        # Limpar metas existentes para o mês/ano selecionado
+        MetaDiaria.query.filter_by(mes=mes, ano=ano).delete()
+        
+        # Inserir novas metas
+        for _, row in df.iterrows():
+            dia = row['Dia']
             
-            # Verificar se as abas necessárias existem
-            required_sheets = ["Alvarenga", "Corbisier", "Piraporinha"]
-            missing_sheets = [sheet for sheet in required_sheets if sheet not in xls.sheet_names]
+            # Verificar se o dia é válido
+            if not isinstance(dia, int) or dia < 1 or dia > 31:
+                continue
             
-            if missing_sheets:
-                flash(f"Abas obrigatórias ausentes: {', '.join(missing_sheets)}", "danger")
-                os.remove(temp_path)  # Remover arquivo temporário
-                return redirect(url_for("main.admin"))
+            # Criar data
+            try:
+                data = date(ano, mes, dia)
+            except ValueError:
+                continue
             
-            # Mapear nomes de lojas para IDs
-            lojas = User.query.filter_by(role="loja").all()
-            loja_map = {loja.store_name: loja.id for loja in lojas}
-            
-            # Processar cada aba
-            for sheet_name in required_sheets:
-                if sheet_name not in loja_map:
-                    flash(f"Loja '{sheet_name}' não encontrada no sistema.", "danger")
+            # Inserir meta para cada loja
+            for nome_loja, loja in lojas.items():
+                valor_meta = row[nome_loja]
+                
+                # Verificar se o valor da meta é válido
+                if not isinstance(valor_meta, (int, float)) or valor_meta <= 0:
                     continue
                 
-                loja_id = loja_map[sheet_name]
-                
-                # Ler a aba
-                df = pd.read_excel(temp_path, sheet_name=sheet_name)
-                
-                # Verificar se as colunas necessárias existem
-                if 'Dia' not in df.columns or 'Meta' not in df.columns:
-                    flash(f"Colunas 'Dia' e 'Meta' obrigatórias ausentes na aba {sheet_name}.", "danger")
-                    continue
-                
-                # Remover metas existentes para este mês/ano/loja
-                MetaDiaria.query.filter_by(
+                # Criar nova meta
+                nova_meta = MetaDiaria(
+                    loja_id=loja.id,
+                    data=data,
+                    valor_meta=valor_meta,
+                    valor=valor_meta,
+                    dia=dia,
                     mes=mes,
-                    ano=ano,
-                    loja_id=loja_id
-                ).delete()
-                
-                # Inserir novas metas
-                for _, row in df.iterrows():
-                    if pd.notna(row['Dia']) and pd.notna(row['Meta']):
-                        try:
-                            dia = int(row['Dia'])
-                            meta_valor = float(row['Meta'])
-                            
-                            # Verificar se o dia é válido
-                            if dia < 1 or dia > 31:
-                                continue
-                            
-                            # Criar data
-                            try:
-                                data = date(ano, mes, dia)
-                            except ValueError:
-                                # Dia inválido para o mês
-                                continue
-                            
-                            # Criar nova meta
-                            nova_meta = MetaDiaria(
-                                dia=dia,
-                                mes=mes,
-                                ano=ano,
-                                valor=meta_valor,
-                                valor_meta=meta_valor,
-                                data=data,
-                                loja_id=loja_id
-                            )
-                            db.session.add(nova_meta)
-                        except (ValueError, TypeError):
-                            # Ignorar linhas com valores inválidos
-                            continue
-            
-            # Commit das alterações
-            db.session.commit()
-            
-            # Remover arquivo temporário
-            os.remove(temp_path)
-            
-            flash(f"Metas para {MESES_PT[mes]} de {ano} carregadas com sucesso!", "success")
-            return redirect(url_for("main.admin"))
-            
-        except Exception as e:
-            flash(f"Erro ao processar o arquivo: {str(e)}", "danger")
-            # Remover arquivo temporário em caso de erro
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-            return redirect(url_for("main.admin"))
-    else:
-        flash("Formato de arquivo inválido. Por favor, envie um arquivo .xlsx.", "danger")
-        return redirect(url_for("main.admin"))
+                    ano=ano
+                )
+                db.session.add(nova_meta)
+        
+        # Commit das alterações
+        db.session.commit()
+        
+        flash(f'Metas para {MESES_PT[mes]}/{ano} carregadas com sucesso!', 'success')
+        
+    except Exception as e:
+        flash(f'Erro ao processar o arquivo: {str(e)}', 'danger')
+    
+    return redirect(url_for('main.admin'))
 
-@main_bp.route("/quadro-medalhas/historico")
+@main_bp.route("/historico-medalhas")
 @login_required
 def historico_medalhas():
     # Obter o mês e ano selecionados do parâmetro da URL, ou usar o mês/ano atual como padrão
@@ -598,7 +580,19 @@ def historico_medalhas():
     selected_month = request.args.get('month', type=int, default=hoje.month)
     selected_year = request.args.get('year', type=int, default=hoje.year)
     
-    # Buscar medalhas do mês/ano selecionado
+    # Validar mês e ano
+    if selected_month < 1 or selected_month > 12:
+        selected_month = hoje.month
+    if selected_year < 2024 or selected_year > 2030:  # Ajuste o intervalo conforme necessário
+        selected_year = hoje.year
+    
+    # Obter o nome do mês em português
+    selected_month_name = MESES_PT[selected_month]
+    
+    # Buscar todas as lojas
+    lojas = User.query.filter_by(role="loja").all()
+    
+    # Buscar medalhas para o mês/ano selecionado
     medalhas = Medalha.query.filter_by(
         mes=selected_month,
         ano=selected_year
@@ -613,16 +607,9 @@ def historico_medalhas():
         
         medalhas_por_loja[medalha.loja_id].append(medalha)
     
-    # Buscar informações das lojas
-    lojas = User.query.filter_by(role="loja").all()
-    lojas_dict = {loja.id: loja for loja in lojas}
-    
-    # Obter o nome do mês em português
-    selected_month_name = MESES_PT[selected_month]
-    
     return render_template("historico_medalhas.html",
+                           lojas=lojas,
                            medalhas_por_loja=medalhas_por_loja,
-                           lojas=lojas_dict,
                            selected_month=selected_month,
                            selected_year=selected_year,
                            selected_month_name=selected_month_name)
