@@ -135,7 +135,6 @@
                 </div>
             </form>
         </div>
-        
         <div class="grid-metas">
             <div class="meta-consolidada">
                 <h3>Total Geral do Grupo</h3>
@@ -280,48 +279,52 @@
                     <button type="submit" class="btn btn-secundario btn-sm">Visualizar</button>
                 </div>
                 <div class="viewing-period">
-                    <p>Visualizando dados de: <strong>{{ selected_month_name|default(current_month) }} de {{ selected_year|default(current_year) }}</strong></p>
+                    <p>Visualizando dados de: <strong>{{ selected_month_name }} de {{ selected_year }}</strong></p>
                 </div>
             </form>
         </div>
         
-      <form id="form-faturamento-diario" method="POST" action="{{ url_for('main.registrar_faturamento') }}">
-    <div class="form-group">
-        <label for="dia-faturamento">Selecione o Dia:</label>
-        <select id="dia-faturamento" name="dia" class="form-control">
-            {% for i in range(1, 32) %}
-                <option value="{{ i }}" {% if i == dia_atual %}selected{% endif %}>{{ i }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="faturamento-dia">Registrar Faturamento do Dia:</label>
-        <input type="number" id="faturamento-dia" name="faturamento" step="0.01" min="0" required class="form-control">
-    </div>
-    <input type="hidden" name="mes" value="{{ selected_month|default(current_month_num) }}">
-    <input type="hidden" name="ano" value="{{ selected_year|default(current_year) }}">
-    <button type="submit" class="btn btn-principal">Salvar Faturamento</button>
-</form>
-
-        <hr style="margin: 20px 0;">
-        <div class="meta-info">
-            <h3>Meta do Dia</h3>
-            <p>Sua meta para hoje: R$ <span id="loja-meta-diaria">{{ dados_hoje.meta|default('0,00') }}</span></p>
-            <p>Faturamento Registrado: R$ <span id="loja-faturamento-registrado">{{ dados_hoje.faturamento|default('0,00') }}</span></p>
-            <p>Percentual Atingido: <span id="loja-percentual-atingido">{{ dados_hoje.percentual|default('0') }}</span>%</p>
-            <div class="barra-progresso">
-                <div class="progresso-atual" id="loja-progresso-diario" style="width: {{ dados_hoje.percentual|default('0') }}%;">{{ dados_hoje.percentual|default('0') }}%</div>
+        <!-- Meta do Dia -->
+        <div class="card meta-do-dia">
+            <h3 class="card-header">Meta do Dia ({{ data_atual }})</h3>
+            <div class="meta-do-dia-content">
+                <p>Sua meta para hoje: R$ <span id="loja-meta-diaria">{{ dados_hoje.meta|default('0,00') }}</span></p>
+                <p>Faturamento registrado: R$ <span id="loja-faturamento-diario">{{ dados_hoje.faturamento|default('0,00') }}</span></p>
+                <p>Percentual atingido: <span id="loja-percentual-atingido">{{ dados_hoje.percentual|default('0') }}</span>%</p>
+                <div class="barra-progresso">
+                    <div class="progresso-atual" id="loja-progresso-diario" style="width: {{ dados_hoje.percentual|default('0') }}%;">{{ dados_hoje.percentual|default('0') }}%</div>
+                </div>
+                <p>Total acumulado no mês: R$ <span id="loja-acumulado-mes">{{ dados_meta.acumulado|default('0,00') }}</span></p>
             </div>
-            <p>Total Acumulado no Mês: R$ <span id="loja-acumulado-mes">{{ dados_meta.acumulado|default('0,00') }}</span></p>
         </div>
         
-        <!-- Gráficos detalhados para a loja (iguais aos do administrador) -->
-        <hr style="margin: 20px 0;">
-        <h3>Desempenho Detalhado - {{ nome_loja }}</h3>
+        <!-- Formulário para Registrar Faturamento -->
+        <div class="card registrar-faturamento">
+            <h3 class="card-header">Registrar Faturamento do Dia</h3>
+            <div class="registrar-faturamento-content">
+                <form id="form-faturamento-diario" method="POST" action="{{ url_for('main.registrar_faturamento') }}">
+                    <div class="form-group">
+                        <label for="dia">Dia:</label>
+                        <select id="dia" name="dia" required>
+                            {% for i in range(1, 32) %}
+                                <option value="{{ i }}" {% if i == dia_atual %}selected{% endif %}>{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="faturamento">Valor do Faturamento (R$):</label>
+                        <input type="number" id="faturamento" name="faturamento" step="0.01" min="0" required>
+                    </div>
+                    <input type="hidden" name="mes" value="{{ current_month_num }}">
+                    <input type="hidden" name="ano" value="{{ current_year }}">
+                    <button type="submit" class="btn btn-principal">Salvar</button>
+                </form>
+            </div>
+        </div>
         
         <!-- Gráfico de Meta Mensal vs. Acumulado -->
         <div class="grafico-meta-mensal">
-            <h5>Meta Mensal vs. Acumulado</h5>
+            <h3>Meta Mensal vs. Acumulado</h3>
             <div class="grafico-container">
                 <div class="grafico-barra">
                     <div class="grafico-label">Meta Mensal</div>
@@ -345,7 +348,7 @@
         
         <!-- Tabela de Histórico Diário -->
         <div class="historico-diario-container">
-            <h5>Histórico Diário</h5>
+            <h3>Histórico Diário</h3>
             <div class="tabela-container">
                 <table class="tabela-historico">
                     <thead>
@@ -357,6 +360,7 @@
                         </tr>
                     </thead>
                     <tbody id="loja-historico-diario">
+                        <!-- Dados serão carregados dinamicamente -->
                         {% for dia in historico %}
                         <tr>
                             <td>{{ dia.dia }}</td>
@@ -371,22 +375,217 @@
         </div>
     </div>
     {% endif %}
-
-    <!-- Link para o Quadro de Medalhas -->
+    
     <div class="acoes-dashboard">
         <a href="{{ url_for('main.historico_medalhas') }}" class="btn btn-secundario">Ver Quadro de Medalhas</a>
-        {% if usuario_master %}
-        <a href="{{ url_for('main.admin') }}" class="btn btn-principal">Painel Administrativo</a>
-        {% endif %}
     </div>
 </div>
 
 <style>
-/* Estilos para o quadro de medalhas reformulado */
-.quadro-medalhas {
-    margin-bottom: 2rem;
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
-.quadro-medalhas-content {
+.month-indicator {
+    background-color: var(--cor-fundo-escuro);
+    color: var(--cor-texto-claro);
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.contador-regressivo {
+    background-color: var(--cor-fundo-claro);
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+.frase-motivacional-painel {
+    background-color: var(--cor-roxo-principal);
+    color: var(--cor-texto-claro);
+    padding: 15px 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.1em;
+}
+.card {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+.card-header {
+    background-color: var(--cor-roxo-principal);
+    color: var(--cor-texto-claro);
+    padding: 15px 20px;
+    margin: 0;
+    font-size: 1.2em;
+}
+.meta-do-dia {
+    margin-bottom: 20px;
+}
+.meta-do-dia-content {
+    padding: 20px;
+}
+.barra-progresso {
+    height: 25px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+.progresso-atual {
+    height: 100%;
+    background-color: var(--cor-verde);
+    text-align: center;
+    line-height: 25px;
+    color: white;
+    font-weight: bold;
+    transition: width 0.5s ease-in-out;
+}
+.registrar-faturamento-content {
+    padding: 20px;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+}
+.btn-principal {
+    background-color: var(--cor-roxo-principal);
+    color: white;
+}
+.btn-secundario {
+    background-color: var(--cor-fundo-escuro);
+    color: white;
+}
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+.grafico-meta-mensal {
+    padding: 20px;
+}
+.grafico-container {
+    margin-top: 15px;
+}
+.grafico-barra {
+    margin-bottom: 10px;
+}
+.grafico-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.grafico-valor {
+    margin-bottom: 5px;
+}
+.barra-meta, .barra-acumulado {
+    height: 25px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.barra-meta .barra-preenchimento {
+    height: 100%;
+    background-color: #ddd;
+}
+.barra-acumulado .barra-preenchimento {
+    height: 100%;
+    background-color: var(--cor-verde);
+    transition: width 0.5s ease-in-out;
+}
+.grafico-percentual {
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: right;
+}
+.historico-diario-container {
+    padding: 20px;
+}
+.tabela-container {
+    overflow-x: auto;
+}
+.tabela-historico {
+    width: 100%;
+    border-collapse: collapse;
+}
+.tabela-historico th, .tabela-historico td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+.tabela-historico th {
+    background-color: var(--cor-fundo-escuro);
+    color: white;
+}
+.meta-atingida {
+    color: var(--cor-verde);
+    font-weight: bold;
+}
+.meta-nao-atingida {
+    color: var(--cor-vermelho);
+}
+.grid-lojas-master {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 0 20px 20px 20px;
+}
+.card-loja-master {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.nome-loja {
+    color: var(--cor-roxo-principal);
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+.month-year-selector {
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+.selector-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.viewing-period {
+    margin-top: 10px;
+    font-style: italic;
+}
+.quadro-medalhas {
     padding: 1rem;
     overflow-x: auto;
 }
