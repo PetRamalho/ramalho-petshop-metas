@@ -271,14 +271,16 @@ function formatarValor(valor) {
     });
 }
 
-// Remover qualquer interceptação do formulário de faturamento
+// IMPORTANTE: Remover qualquer interceptação do formulário de faturamento
+// Esta é a parte crítica que estava causando o problema
 document.addEventListener('DOMContentLoaded', function() {
     const formFaturamento = document.getElementById('form-faturamento-diario');
     if (formFaturamento) {
         // Garantir que o formulário seja submetido normalmente sem interceptação
         formFaturamento.addEventListener('submit', function(event) {
-            // Não prevenir o comportamento padrão - deixar o formulário ser enviado normalmente
-            // Não mostrar mensagem de simulação
+            // NÃO prevenir o comportamento padrão - deixar o formulário ser enviado normalmente
+            // NÃO mostrar mensagem de simulação
+            console.log('Formulário de faturamento enviado normalmente');
         });
     }
 });
